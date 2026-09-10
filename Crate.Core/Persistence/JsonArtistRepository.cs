@@ -6,6 +6,7 @@ namespace Crate.Core.Persistence;
 
 public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json") : IArtistRepository
 {
+    private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
     public async Task<IReadOnlyList<TrackedArtist>> GetAllAsync()
     {
         var json = await blobs.ReadAsync(key);

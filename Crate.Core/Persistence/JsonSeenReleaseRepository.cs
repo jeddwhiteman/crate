@@ -24,6 +24,6 @@ public class JsonSeenReleaseRepository(IBlobStore blobStore, string key = "seen.
                 all.Add(k);
         
         var trimmed = all.Count > maxKeys ? all.Skip(all.Count - maxKeys) : all;
-        await blobStore.WriteAsync(key, JsonSerializer.Serialize(new SeenReleasesDto(trimmed)));
+        await blobStore.WriteAsync(key, JsonSerializer.Serialize(new SeenReleasesDto(trimmed.ToList())));
     }
 }

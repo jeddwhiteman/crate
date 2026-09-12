@@ -12,10 +12,9 @@ public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json")
         var json = await blobs.ReadAsync(key);
         if (string.IsNullOrWhiteSpace(json)) return [];
 
-        var dtos = JsonSerializer.Deserialize<List<TrackedArtist>>(json) ?? [];
+        var dtos = JsonSerializer.Deserialize<List<TrackedArtistDto>>(json) ?? [];
         
-        //return dtos.Select(ToDomain).ToList();
-        return dtos;
+        return dtos.Select(ToDomain).ToList();
     }
 
     public async Task<TrackedArtist?> GetByIdAsync(Guid id) =>
@@ -36,6 +35,9 @@ public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json")
         if (artist.Mbid is not null &&
             all.Any(a => string.Equals(a.Mbid, artist.Mbid, StringComparison.OrdinalIgnoreCase)))
             throw new InvalidOperationException($"MBID {artist.Mbid} is already tracked.");
+
+        all.Add(artist);
+        await PersistAsync(all);
     }
 
     public async Task UpdateAsync(TrackedArtist artist)

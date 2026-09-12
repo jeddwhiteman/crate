@@ -23,7 +23,12 @@ public class ReleaseFinder
                 continue;
             }
 
-            Console.WriteLine($"  {i + 1}/{artists.Count} {artist.Name}");;
+            Console.WriteLine($"  {i + 1}/{artists.Count} {artist.Name}");
+
+            var releases = await source.GetReleasesAsync(artist);
+
+            foreach (var release in releases.Where(r => r.Date >= from && r.Date <= to))
+                found[release.SeenKey(today)] = release;
         }
 
         return found;

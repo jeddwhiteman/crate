@@ -8,8 +8,8 @@ namespace Crate.Core.Sources;
 
 public class MusicBrainzClient
 {
-    private const string Base = "https://musicbrainz.org/ws/2/";
-    private static readonly TimeSpan MinInterval = TimeSpan.FromMicroseconds(1100);
+    private const string Base = "https://musicbrainz.org/ws/2";
+    private static readonly TimeSpan MinInterval = TimeSpan.FromMilliseconds(1100);
 
     private static readonly HttpClient Http = new();
     private static readonly SemaphoreSlim Gate = new(1, 1);
@@ -36,10 +36,10 @@ public class MusicBrainzClient
 
             if (res.StatusCode == HttpStatusCode.ServiceUnavailable)
             {
-                var wait = TimeSpan.FromSeconds(Math.Pow(2, attempt));
+                var wait = res.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(Math.Pow(2, attempt));
                 Console.WriteLine($"throttled, backing off {wait.TotalSeconds}s");
                 await Task.Delay(wait);
-                continue;   
+                continue;
             }
             
             if (!res.IsSuccessStatusCode)
@@ -56,7 +56,7 @@ public class MusicBrainzClient
         try
         {
             var since = DateTime.UtcNow - _lastRequest;
-            if (since > MinInterval) await Task.Delay(MinInterval - since);
+            if (since < MinInterval) await Task.Delay(MinInterval - since);
             _lastRequest = DateTime.UtcNow;
 
         }
@@ -109,7 +109,7 @@ public class MusicBrainzClient
         for (var i = 0; i < ids.Count; i += batchSize)
         {
             var batch = ids.Skip(i).Take(batchSize).ToList();
-            var query = new StringBuilder($"{Base}url?inc=artist-rels&fmt=json");
+            var query = new StringBuilder($"{Base}/url?inc=artist-rels&fmt=json");
             foreach (var id in batch)
                 query.Append("&resource=" + Uri.EscapeDataString($"https://open.spotify.com/artist/{id}"));
             Console.WriteLine($"    mapping {i + 1}-{i + batch.Count} of {ids.Count}");
@@ -118,7 +118,7 @@ public class MusicBrainzClient
             foreach (var url in res.Urls ?? [])
             {
                 var spotifyId = url.Resource.Split('/').LastOrDefault();
-                var rel = url.Relations.FirstOrDefault(r => r.Artist is not null);
+                var rel = url.Relations?.FirstOrDefault(r => r.Artist is not null);
 
                 if (spotifyId is not null && rel?.Artist is not null)
                     result[spotifyId] = rel.Artist.Id;

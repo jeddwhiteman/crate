@@ -4,10 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <UserSecretsId>d3045c49-1ef8-4233-adc8-ad9592ccf647</UserSecretsId>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Folder Include="Application\" />
-    </ItemGroup>
 
 </Project>

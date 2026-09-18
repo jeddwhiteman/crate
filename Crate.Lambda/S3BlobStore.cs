@@ -6,7 +6,7 @@ namespace Crate.Lambda;
 
 public class S3BlobStore(IAmazonS3 s3, string bucket) : IBlobStore
 {
-    public async Task<string?> ReadAsync(string key)
+    public async Task<string?> ReadBlobAsync(string key)
     {
         try
         {
@@ -21,7 +21,7 @@ public class S3BlobStore(IAmazonS3 s3, string bucket) : IBlobStore
         }
     }
 
-    public async Task WriteAsync(string key, string content)
+    public async Task WriteBlobAsync(string key, string content)
     {
         await s3.PutObjectAsync(new PutObjectRequest
         {

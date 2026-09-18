@@ -7,7 +7,7 @@ public class JsonSeenReleaseRepository(IBlobStore blobStore, string key = "seen.
 {
     public async Task<IReadOnlySet<string>> GetAllKeysAsync()
     {
-        var json = await blobStore.ReadAsync(key);
+        var json = await blobStore.ReadBlobAsync(key);
         if (string.IsNullOrWhiteSpace(json)) return new HashSet<string>();
 
         var dto = JsonSerializer.Deserialize<SeenReleasesDto>(json);
@@ -24,6 +24,6 @@ public class JsonSeenReleaseRepository(IBlobStore blobStore, string key = "seen.
                 all.Add(k);
         
         var trimmed = all.Count > maxKeys ? all.Skip(all.Count - maxKeys) : all;
-        await blobStore.WriteAsync(key, JsonSerializer.Serialize(new SeenReleasesDto(trimmed.ToList())));
+        await blobStore.WriteBlobAsync(key, JsonSerializer.Serialize(new SeenReleasesDto(trimmed.ToList())));
     }
 }

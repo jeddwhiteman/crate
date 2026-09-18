@@ -25,7 +25,7 @@ public class MusicBrainzClient
         Http.DefaultRequestHeaders.UserAgent.ParseAdd($"crate/{appVersion} ( {contactEmail})");
     }
 
-    private static async Task<T> GetAsync<T>(string url)
+    private static async Task<T> GetJsonAsync<T>(string url)
     {
         for (var attempt = 1; attempt <= 4; attempt++)
         {
@@ -74,7 +74,7 @@ public class MusicBrainzClient
     public async Task<IReadOnlyList<ArtistCandidate>> SearchArtistsAsync(string name, int limit = 5)
     {
         var url = $"{Base}/artist?query={Uri.EscapeDataString(name)}&limit={limit}&fmt=json";
-        var res = await GetAsync<MusicBrainzArtistSearchResponse>(url);
+        var res = await GetJsonAsync<MusicBrainzArtistSearchResponse>(url);
         return res.Artists
             .Select(a => new ArtistCandidate(a.Id, a.Name, a.Disambiguation, a.Score)).ToList();
     }
@@ -89,7 +89,7 @@ public class MusicBrainzClient
         {
             var url = $"{Base}/release-group?artist={mbid}" +
                       $"&type=album|ep|single&limit=100&offset={offset}&fmt=json";
-            var res = await GetAsync<MusicBrainzReleaseGroupResponse>(url);
+            var res = await GetJsonAsync<MusicBrainzReleaseGroupResponse>(url);
             
             all.AddRange(res.ReleaseGroups.Select(g => new MusicBrainzReleaseGroupInfo(g.Id, g.Title, g.FirstReleaseDate, g.PrimaryType)));
 
@@ -114,7 +114,7 @@ public class MusicBrainzClient
                 query.Append("&resource=" + Uri.EscapeDataString($"https://open.spotify.com/artist/{id}"));
             Console.WriteLine($"    mapping {i + 1}-{i + batch.Count} of {ids.Count}");
 
-            var res = await GetAsync<MusicBrainzUrlListResponse>(query.ToString());
+            var res = await GetJsonAsync<MusicBrainzUrlListResponse>(query.ToString());
             foreach (var url in res.Urls ?? [])
             {
                 var spotifyId = url.Resource.Split('/').LastOrDefault();

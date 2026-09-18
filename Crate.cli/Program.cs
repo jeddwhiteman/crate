@@ -65,19 +65,19 @@ async Task AddArtistAsync(string artistName)
 
     var chosen = candidates[pick - 1];
 
-    if (await repo.GetByMbidAsync(chosen.Mbid) is not null)
+    if (await repo.GetArtistByMbidAsync(chosen.Mbid) is not null)
     {
         Console.WriteLine($"Already tracked.");
         return;
     }
 
-    await repo.AddAsync(new TrackedArtist(chosen.Name, chosen.Mbid));
+    await repo.AddArtistAsync(new TrackedArtist(chosen.Name, chosen.Mbid));
     Console.WriteLine($"Added {chosen.Name}");
 }
 
 async Task ListArtistsAsync()
 {
-    var all = await repo.GetAllAsync();
+    var all = await repo.GetArtistAsync();
     Console.WriteLine($"{all.Count} tracked:");
     foreach (var trackedArtist in all)
         Console.WriteLine($"{trackedArtist}");
@@ -86,7 +86,7 @@ async Task ListArtistsAsync()
 async Task RemoveArtistAsync(string artistName)
 {
     var match =
-        (await repo.GetAllAsync()).FirstOrDefault(a => a.Name.Equals(artistName, StringComparison.OrdinalIgnoreCase));
+        (await repo.GetArtistAsync()).FirstOrDefault(a => a.Name.Equals(artistName, StringComparison.OrdinalIgnoreCase));
 
     if (match is null)
     {
@@ -94,7 +94,7 @@ async Task RemoveArtistAsync(string artistName)
         return;
     }
 
-    await repo.RemoveAsync(match.Id);
+    await repo.RemoveArtistAsync(match.Id);
     Console.WriteLine($"Removed {match.Name}");
 }
 

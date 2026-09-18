@@ -41,23 +41,23 @@ public class HtmlRenderer
             if (release.Date != current)
             {
                 if (current is not null) sb.Append("</ul>");
-                sb.Append($"<h2 style=\"font-size:14px;colour:#666;margin-bottom:4px\">"
-                          + $"{release.Date:ddd dd MMM}</h2><ul> style=\"margin-top:0\">");
+                sb.Append($"<h2 style=\"font-size:14px;color:#666;margin-bottom:4px\">"
+                          + $"{release.Date:ddd dd MMM}</h2><ul style=\"margin-top:0\">");
                 current = release.Date;
             }
 
             var artist = HtmlEncoder.Default.Encode(release.ArtistName);
             var title = HtmlEncoder.Default.Encode(release.Title);
-            var type = release.Type is null ? "" : $"<i>{HtmlEncoder.Default.Encode(release.Title)})</i>";
+            var type = release.Type is null ? "" : $" <i>{HtmlEncoder.Default.Encode(release.Type)}</i>";
 
-            sb.Append("<l1>");
+            sb.Append("<li>");
             sb.Append($"<b>{artist}</b> - ");
             sb.Append(release.Url is null ? title : $"<a href=\"{release.Url}\">{title}</a>");
             sb.Append(type);
 
             if (release.SpotifyUrl is not null)
-                sb.Append($"<a href=\"{release.SpotifyUrl}\" style=\"font-size:12px\">Spotify</a>");
-            sb.Append("</l1>");
+                sb.Append($" <a href=\"{release.SpotifyUrl}\" style=\"font-size:12px\">Spotify</a>");
+            sb.Append("</li>");
         }
         sb.Append("</ul>");
     }

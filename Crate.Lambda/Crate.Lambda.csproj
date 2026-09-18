@@ -14,4 +14,8 @@
       <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.103.6" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Crate.Core\Crate.Core.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -7,7 +7,7 @@ namespace Crate.Core.Persistence;
 public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json") : IArtistRepository
 {
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
-    public async Task<IReadOnlyList<TrackedArtist>> GetAllAsync()
+    public async Task<IReadOnlyList<TrackedArtist>> GetArtistsAsync()
     {
         var json = await blobs.ReadAsync(key);
         if (string.IsNullOrWhiteSpace(json)) return [];
@@ -17,17 +17,17 @@ public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json")
         return dtos.Select(ToDomain).ToList();
     }
 
-    public async Task<TrackedArtist?> GetByIdAsync(Guid id) =>
-        (await GetAllAsync()).FirstOrDefault(a => a.Id == id);
+    public async Task<TrackedArtist?> GetArtistByIdAsync(Guid id) =>
+        (await GetArtistsAsync()).FirstOrDefault(a => a.Id == id);
 
-    public async Task<TrackedArtist?> GetByMbidAsync(string mbid) => (await GetAllAsync()).FirstOrDefault(a => string.Equals(a.Mbid, mbid, StringComparison.OrdinalIgnoreCase));
+    public async Task<TrackedArtist?> GetArtistByMbidAsync(string mbid) => (await GetArtistsAsync()).FirstOrDefault(a => string.Equals(a.Mbid, mbid, StringComparison.OrdinalIgnoreCase));
 
-    public async Task<TrackedArtist?> GetBySpotifyIdAsync(string spotifyId) 
-    => (await GetAllAsync()).FirstOrDefault(a => a.SpotifyId == spotifyId);
+    public async Task<TrackedArtist?> GetArtistBySpotifyIdAsync(string spotifyId) 
+    => (await GetArtistsAsync()).FirstOrDefault(a => a.SpotifyId == spotifyId);
 
-    public async Task AddAsync(TrackedArtist artist)
+    public async Task AddArtistAsync(TrackedArtist artist)
     {
-        var all = (await GetAllAsync()).ToList();
+        var all = (await GetArtistsAsync()).ToList();
 
         if (all.Any(a => a.Id == artist.Id))
             throw new InvalidOperationException($"Artist with {artist.Id} already exists.");
@@ -40,9 +40,9 @@ public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json")
         await PersistAsync(all);
     }
 
-    public async Task UpdateAsync(TrackedArtist artist)
+    public async Task UpdateArtistAsync(TrackedArtist artist)
     {
-        var all = (await GetAllAsync()).ToList();
+        var all = (await GetArtistsAsync()).ToList();
         var index = all.FindIndex(a => a.Id == artist.Id);
 
         if (index > 0)
@@ -52,16 +52,16 @@ public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json")
         await PersistAsync(all);
     }
 
-    public async Task RemoveAsync(Guid id)
+    public async Task RemoveArtistAsync(Guid id)
     {
-        var all = (await GetAllAsync()).ToList();
+        var all = (await GetArtistsAsync()).ToList();
         all.RemoveAll(a => a.Id == id);
         await PersistAsync(all);
     }
 
     public async Task AddRangeAsync(IEnumerable<TrackedArtist> artists)
     {
-        var all = (await GetAllAsync()).ToList();
+        var all = (await GetArtistsAsync()).ToList();
         var existing = all.Where(a => a.Mbid is not null).Select(a => a.Mbid).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         foreach (var artist in artists)

@@ -72,7 +72,10 @@ public class Function
         await Ses.SendEmailAsync(new SendEmailRequest
         {
             FromEmailAddress = MailFrom,
-            Destination = new Destination { ToAddresses = [MailTo] },
+            Destination = new Destination
+            {
+                ToAddresses = MailTo.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList()
+            },
             Content = new EmailContent()
             {
                 Simple = new Message
@@ -80,7 +83,7 @@ public class Function
                     Subject = new Content { Data = subject },
                     Body = new Body
                     {
-                        Html = new Content { Data = $"<html><body>{html}</body></html>" }
+                        Html = new Content { Data = html }
                     }
                 }
             }

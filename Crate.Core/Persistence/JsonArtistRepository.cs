@@ -9,7 +9,7 @@ public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json")
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
     public async Task<IReadOnlyList<TrackedArtist>> GetArtistsAsync()
     {
-        var json = await blobs.ReadAsync(key);
+        var json = await blobs.ReadBlobAsync(key);
         if (string.IsNullOrWhiteSpace(json)) return [];
 
         var dtos = JsonSerializer.Deserialize<List<TrackedArtistDto>>(json) ?? [];
@@ -76,7 +76,7 @@ public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json")
     public async Task PersistAsync(List<TrackedArtist> artists)
     {
         var dtos = artists.Select(ToDto).ToList();
-        await blobs.WriteAsync(key, JsonSerializer.Serialize(dtos, Options));
+        await blobs.WriteBlobAsync(key, JsonSerializer.Serialize(dtos, Options));
     }
 
     private static TrackedArtist ToDomain(TrackedArtistDto d) =>

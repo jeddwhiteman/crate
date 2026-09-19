@@ -77,7 +77,7 @@ async Task AddArtistAsync(string artistName)
 
 async Task ListArtistsAsync()
 {
-    var all = await repo.GetArtistAsync();
+    var all = await repo.GetArtistsAsync();
     Console.WriteLine($"{all.Count} tracked:");
     foreach (var trackedArtist in all)
         Console.WriteLine($"{trackedArtist}");
@@ -86,7 +86,7 @@ async Task ListArtistsAsync()
 async Task RemoveArtistAsync(string artistName)
 {
     var match =
-        (await repo.GetArtistAsync()).FirstOrDefault(a => a.Name.Equals(artistName, StringComparison.OrdinalIgnoreCase));
+        (await repo.GetArtistsAsync()).FirstOrDefault(a => a.Name.Equals(artistName, StringComparison.OrdinalIgnoreCase));
 
     if (match is null)
     {
@@ -105,7 +105,7 @@ async Task RunAsync()
 
     var outPath = Path.Combine(dataDir, "out.html");
     Directory.CreateDirectory(dataDir);
-    await File.WriteAllTextAsync(outPath, $"<html><body>{result.Html}</body></html>");
+    await File.WriteAllTextAsync(outPath, result.Html);
 
     Console.WriteLine($"\nWrote {outPath}");
     Console.WriteLine($"{result.FreshCount} new of {result.TotalFound} found.");

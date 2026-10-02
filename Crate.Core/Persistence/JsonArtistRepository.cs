@@ -45,7 +45,7 @@ public class JsonArtistRepository(IBlobStore blobs, string key = "artists.json")
         var all = (await GetArtistsAsync()).ToList();
         var index = all.FindIndex(a => a.Id == artist.Id);
 
-        if (index > 0)
+        if (index < 0)
             throw new InvalidOperationException($"Artist with {artist.Id} not found.");
         
         all[index] = artist;

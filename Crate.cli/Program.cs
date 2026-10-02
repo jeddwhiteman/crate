@@ -29,6 +29,8 @@ switch (command)
         break;
     case "run": await RunAsync();
         break;
+    case "import": await ImportAsync();
+        break;
     default:
         Console.WriteLine("""
                           Commands:
@@ -109,4 +111,55 @@ async Task RunAsync()
 
     Console.WriteLine($"\nWrote {outPath}");
     Console.WriteLine($"{result.FreshCount} new of {result.TotalFound} found.");
+}
+
+async Task ImportAsync()
+{
+    var tsvPath        = Path.Combine(dataDir, "spotify-followed.tsv");
+    var candidatesPath = Path.Combine(dataDir, "candidates.txt");
+
+    if (!File.Exists(tsvPath) || !File.Exists(candidatesPath))
+    {
+        Console.WriteLine($"Need both {tsvPath} and {candidatesPath}");
+        return;
+    }
+
+    var wanted = (await File.ReadAllLinesAsync(candidatesPath))
+        .Select(l => l.Trim())
+        .Where(l => l.Length > 0)
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    // "spotify:artist:xyz<TAB>Name" -> bare id + name, filtered to the curated list
+    var chosen = (await File.ReadAllLinesAsync(tsvPath))
+        .Select(l => l.Split('\t'))
+        .Where(p => p.Length == 2 && wanted.Contains(p[1].Trim()))
+        .Select(p => (SpotifyId: p[0].Split(':').Last(), Name: p[1].Trim()))
+        .ToList();
+
+    Console.WriteLine($"Resolving MBIDs for {chosen.Count} artists...");
+
+    if (chosen.Count == 0)
+    {
+        Console.WriteLine("Nothing matched — check the names line up between the two files.");
+        return;
+    }
+
+    var map = await musicBrainzClient.MapSpotifyIdsToMbIdsAsync(
+        chosen.Select(a => a.SpotifyId));
+
+    var resolved  = new List<TrackedArtist>();
+    var unmatched = new List<string>();
+
+    foreach (var (spotifyId, name) in chosen)
+    {
+        if (map.TryGetValue(spotifyId, out var mbid))
+            resolved.Add(new TrackedArtist(name, mbid, spotifyId));
+        else
+            unmatched.Add(name);
+    }
+
+    await repo.AddRangeAsync(resolved);
+
+    Console.WriteLine($"\nImported {resolved.Count}, unmatched {unmatched.Count}.");
+    foreach (var name in unmatched) Console.WriteLine($"  {name}");
 }

@@ -6,7 +6,7 @@ namespace Crate.Core.Application;
 public class CrateRunner
 {
     public static async Task<RunResult> RunAsync(IReleaseSource source, IArtistRepository artists,
-        ISeenReleaseRepository seen, int pastDays = 7, int futureDays = 60)
+        ISeenReleaseRepository seen, int pastDays = 7, int futureDays = 7)
     {
         var tracked = await artists.GetArtistsAsync();
         Console.WriteLine($"Tracking {tracked.Count} artists via {source.SourceName}.");
